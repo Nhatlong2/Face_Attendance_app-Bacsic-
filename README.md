@@ -38,9 +38,6 @@ face_attendance_app/
 
 
 ## Cài đặt
-```bash
-git clone <repo>
-cd face_attendance_app
+git clone https://github.com/Nhatlong2/Face_Attendance_app-Bacsic-.git
+cd Face_Attendance_app-Bacsic-
 pip install -r requirements.txt
-
-python main.py

@@ -2,6 +2,7 @@ import cv2
 import face_recognition
 from services.db_service import DatabaseService
 import numpy as np
+from services.user_service import UserService
 
 class FaceRecognizer:
     def __init__(self, db: DatabaseService, tolerance=0.6):
@@ -30,6 +31,7 @@ class FaceRecognizer:
         encodings = face_recognition.face_encodings(rgb, known_face_locations=fr_boxes)
 
         results = []
+        users = UserService(self.db)
         for encoding in encodings:
             matches = face_recognition.compare_faces(self.known_encodings, encoding, self.tolerance)
             name = "Unknown"
@@ -37,7 +39,7 @@ class FaceRecognizer:
             if True in matches:
                 idx = matches.index(True)
                 user_id = self.known_ids[idx]
-                name = f"User {user_id}"
+                name = users.get_user_name_by_id(user_id) or f"User {user_id}"
             results.append((user_id, name))
         return results
 

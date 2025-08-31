@@ -53,8 +53,7 @@ def main():
         for (x, y, w, h), (uid, name) in zip(faces, results):
             color = (0, 255, 0) if is_live else (0, 0, 255)
             cv2.rectangle(frame, (x, y), (x + w, y + h), color, 2)
-            cv2.putText(frame, name, (x, y - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+            cv2.putText(frame, str(name), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
 
             # nếu nhận diện thành công và liveness OK thì log attendance
             if uid is not None and is_live:

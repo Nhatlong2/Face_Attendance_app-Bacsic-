@@ -18,3 +18,9 @@ class UserService:
     def delete_user(self, user_id):
         query = "DELETE FROM Users WHERE id = ?"
         self.db.execute(query, [user_id])
+
+    def get_user_name_by_id(self, user_id):
+        row = self.db.fetchall("SELECT name FROM Users WHERE id = ?", [user_id])
+        if row:
+            return str(row[0]) 
+        return None
