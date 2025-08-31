@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite
+*.log
+*.mdf
+*.ldf
+
+# Project data
+data/faces/
+*.csv
+shape_predictor_68_face_landmarks.dat
+
+# IDE
+.idea/
+.vscode/
