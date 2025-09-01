@@ -1,9 +1,9 @@
 import csv
 from datetime import datetime
 from services.db_service import DatabaseService
-
+from utils.config import CSV_PATH
 class AttendanceService:
-    def __init__(self, db: DatabaseService, csv_path="data/attendance.csv"):
+    def __init__(self, db: DatabaseService, csv_path=CSV_PATH):
         self.db = db
         self.csv_path = csv_path
         self._seen = set()

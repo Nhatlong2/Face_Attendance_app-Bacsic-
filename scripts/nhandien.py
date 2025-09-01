@@ -8,20 +8,20 @@ from services.attendance_service import AttendanceService
 from models.detector import FaceDetector
 from models.recognizer import FaceRecognizer
 from models.liveness import LivenessDetector
-
+from services.user_service import UserService
+from utils.config import *
+from tkinter import messagebox
 
 db = DatabaseService()
 
-# file csv attendance
-CSV_PATH = "data/attendance.csv"
-
-# file shape predictor của dlib (tải trước)
-LANDMARK_PATH = "shape_predictor_68_face_landmarks.dat"
-
-def main():
+def main(name=None):
     # kết nối DB
     attendance = AttendanceService(db, CSV_PATH)
-
+    users = UserService(db)
+    if not name:
+        messagebox.showerror("Lỗi", "Tên không hợp lệ.")
+        return
+    user_id = users.add_user_returning_id(name)
     # load models
     detector = FaceDetector()
     recognizer = FaceRecognizer(db)
@@ -32,7 +32,7 @@ def main():
         print("Không mở được camera.")
         sys.exit(1)
 
-    print("Nhấn Q để thoát.")
+    messagebox.showinfo("Thông báo", f"Nhấn 'q' để thoát.")
     session_id = datetime.now().strftime("%Y%m%d%H%M")
 
     while True:
@@ -67,7 +67,6 @@ def main():
 
     cap.release()
     cv2.destroyAllWindows()
-    db.close()
 
 if __name__ == "__main__":
     main()

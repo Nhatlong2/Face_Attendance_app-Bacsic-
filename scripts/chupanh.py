@@ -4,35 +4,38 @@ import sys
 import face_recognition
 import numpy as np
 from datetime import datetime
-
+from tkinter import messagebox, Tk
 from services.db_service import DatabaseService
 from services.user_service import UserService
-
+from utils.config import FACES_DIR
 
 db = DatabaseService()
 
-
-# nơi lưu ảnh
-FACES_DIR = "data/faces/"
-
-def main():
+def main(name=None):
     # kết nối DB
     users = UserService(db)
 
-    # hỏi tên người dùng mới
-    name = input("Nhập tên người dùng mới: ").strip()
+    # nếu chưa có tham số truyền vào thì lấy từ sys.argv
     if not name:
-        print("Tên không hợp lệ.")
+        if len(sys.argv) > 1:
+            name = sys.argv[1].strip()
+        else:
+            messagebox.showerror("Lỗi", "Chưa nhập tên người dùng!")
+            sys.exit(1)
+
+    if not name:
+        messagebox.showerror("Lỗi", "Tên không hợp lệ.")
         sys.exit(1)
+
     user_id = users.add_user_returning_id(name)
 
     # mở camera
     cap = cv2.VideoCapture(0)
     if not cap.isOpened():
-        print("Không mở được camera.")
+        messagebox.showerror("Lỗi", "Không mở được camera.")
         sys.exit(1)
 
-    print("Nhấn 'c' để chụp ảnh, 'q' để thoát.")
+    messagebox.showinfo("Thông báo", f"Nhấn 'c' để chụp ảnh cho {name}, 'q' để thoát.")
 
     while True:
         ret, frame = cap.read()
@@ -42,11 +45,12 @@ def main():
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord("c"):
-            # lưu ảnh vào thư mục faces
+            # lưu ảnh
             filename = f"{user_id}_{name}.jpg"
+            os.makedirs(FACES_DIR, exist_ok=True)
             save_path = os.path.join(FACES_DIR, filename)
             cv2.imwrite(save_path, frame)
-            print(f"Đã lưu ảnh: {save_path}")
+            messagebox.showinfo("Thông báo", f"Đã lưu ảnh: {save_path}")
 
             # tạo embedding
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -55,21 +59,19 @@ def main():
 
             if len(encodings) > 0:
                 embedding = encodings[0]
-                # lưu vào DB (bảng Faces)
                 db.execute(
                     "INSERT INTO Faces (user_id, embedding, image_path) VALUES (?, ?, ?)",
                     [user_id, embedding.tobytes(), save_path]
                 )
-                print(f"Đã thêm embedding cho user_id={user_id}")
+                messagebox.showinfo("Thông báo", f"Đã thêm embedding cho {name}")
             else:
-                print("Không tìm thấy khuôn mặt, thử lại.")
+                messagebox.showwarning("Cảnh báo", "Không tìm thấy khuôn mặt, thử lại.")
 
         elif key == ord("q"):
             break
 
     cap.release()
     cv2.destroyAllWindows()
-    db.close()
 
 if __name__ == "__main__":
     main()
