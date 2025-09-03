@@ -4,7 +4,7 @@ from imutils import face_utils
 from scipy.spatial import distance as dist
 
 class LivenessDetector:
-    def __init__(self, shape_predictor_path, ear_threshold=0.2, consec_frames=3):
+    def __init__(self, shape_predictor_path, ear_threshold=0.25, consec_frames=2):
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor(shape_predictor_path)
         self.ear_threshold = ear_threshold

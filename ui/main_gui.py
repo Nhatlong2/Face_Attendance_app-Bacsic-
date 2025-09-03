@@ -45,7 +45,7 @@ def mo_them_nguoi():
         if not name:
             messagebox.showerror("Lỗi", "Tên không được để trống")
             return
-        chupanh_main(name)   # gọi trực tiếp, không cần subprocess
+        threading.Thread(target=chupanh_main, args=(name,), daemon=True).start()
         top.destroy()
 
     tk.Button(top, text="Xác nhận", command=submit).pack(pady=10)
@@ -136,7 +136,7 @@ def xem_danh_sach_nguoi_dung():
     top.title("Danh sách người dùng")
     top.geometry("600x350")
 
-    cols = ("ID", "Tên", "Số ảnh")
+    cols = ("ID", "Tên")
     tree = ttk.Treeview(top, columns=cols, show="headings")
     for col in cols:
         tree.heading(col, text=col)
@@ -207,7 +207,7 @@ def xem_diem_danh():
     top.title("Lịch sử điểm danh")
     top.geometry("600x400")
 
-    cols = ("Tên", "Ngày", "Thời gian")
+    cols = ("id", "Tên", "Thời gian")
     tree = ttk.Treeview(top, columns=cols, show="headings")
     for col in cols:
         tree.heading(col, text=col)
@@ -224,8 +224,8 @@ def xem_diem_danh():
             next(reader, None)  # bỏ header nếu có
             for row in reader:
                 if len(row) >= 3:
-                    name, date, time = row[0], row[1], row[2]
-                    tree.insert("", tk.END, values=(name, date, time))
+                    id, name, time = row[0], row[1], row[2]
+                    tree.insert("", tk.END, values=(id, name, time))
     except FileNotFoundError:
         messagebox.showinfo("Thông báo", "Chưa có dữ liệu điểm danh")
 

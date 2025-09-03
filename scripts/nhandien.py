@@ -17,11 +17,6 @@ db = DatabaseService()
 def main(name=None):
     # kết nối DB
     attendance = AttendanceService(db, CSV_PATH)
-    users = UserService(db)
-    if not name:
-        messagebox.showerror("Lỗi", "Tên không hợp lệ.")
-        return
-    user_id = users.add_user_returning_id(name)
     # load models
     detector = FaceDetector()
     recognizer = FaceRecognizer(db)
