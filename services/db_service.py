@@ -10,9 +10,9 @@ class DatabaseService:
         if auth == "sql":
             username = DB_CONFIG["username"]
             password = DB_CONFIG["password"]
-            conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}"
+            conn_str = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}"
         else:
-            conn_str = f"DRIVER={{SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;"
+            conn_str = f"DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;"
 
         self.conn = pyodbc.connect(conn_str)
         self.cursor = self.conn.cursor()

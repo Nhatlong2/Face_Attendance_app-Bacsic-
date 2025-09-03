@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import messagebox, simpledialog,ttk
 from tkinter import filedialog
 from PIL import Image, ImageTk
-import subprocess, os, sys
+import subprocess, sys
 from pathlib import Path
 from scripts.chupanh import main as chupanh_main
 from scripts.nhandien import main as nhandien_main
@@ -68,23 +68,45 @@ def mo_them_nguoi_file():
         if not filepath:
             return
 
-        # kết nối DB
+        # Kết nối DB
         db = DatabaseService()
         users = UserService(db)
         user_id = users.add_user_returning_id(name)
 
-        # tạo thư mục faces nếu chưa tồn tại
+        # Tạo thư mục faces nếu chưa tồn tại
         os.makedirs(FACES_DIR, exist_ok=True)
 
-        # copy ảnh vào thư mục
+        # Copy ảnh vào thư mục
         filename = f"{user_id}_{name}.jpg"
         save_path = os.path.join(FACES_DIR, filename)
         shutil.copy(filepath, save_path)
 
-        messagebox.showinfo("Thành công", f"Đã thêm {name} và lưu ảnh thành công!")
+        # ====== Mã hóa khuôn mặt và lưu vào DB ======
+        image = cv2.imread(save_path)
+        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        boxes = face_recognition.face_locations(rgb)
 
+        if not boxes:
+            messagebox.showerror("Lỗi", "Không phát hiện được khuôn mặt trong ảnh!")
+            db.close()
+            return
+
+        encodings = face_recognition.face_encodings(rgb, boxes)
+        if not encodings:
+            messagebox.showerror("Lỗi", "Không tạo được mã hóa khuôn mặt!")
+            db.close()
+            return
+
+        encoding = encodings[0]
+        encoding_bytes = encoding.tobytes()
+        db.execute("INSERT INTO Faces (user_id, embedding) VALUES (?, ?)", [user_id, encoding_bytes])
+        db.close()
+
+        messagebox.showinfo("Thành công", f"Đã thêm {name}, lưu ảnh và mã hóa khuôn mặt thành công!")
         top.destroy()
+
     tk.Button(top, text="Chọn ảnh và lưu", command=submit).pack(pady=10)
+
 
 def xoa_nguoi_dung():
     name = simpledialog.askstring("Xóa người dùng", "Nhập tên người cần xóa:")
@@ -131,6 +153,7 @@ def reset_system():
 
     except Exception as e:
         messagebox.showerror("Lỗi", f"Không thể reset dữ liệu: {e}")
+
 def xem_danh_sach_nguoi_dung():
     top = tk.Toplevel(root)
     top.title("Danh sách người dùng")
