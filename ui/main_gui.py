@@ -319,7 +319,7 @@ btn_xem_ds = tk.Button(
     padx=5,
     command=xem_danh_sach_nguoi_dung
 )
-btn_xem_ds.pack(side="right", padx=20)
+btn_xem_ds.pack(side="left", padx=20)
 
 btn_exit = tk.Button(
     bottom_frame,
@@ -330,7 +330,7 @@ btn_exit = tk.Button(
     padx=5,
     command=root.destroy
 )
-btn_exit.pack(side="left", padx=20)
+btn_exit.pack(side="right", padx=20)
 
 root.configure(bg="#ffffff")
 root.mainloop()
