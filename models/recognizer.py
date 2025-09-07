@@ -5,7 +5,7 @@ import numpy as np
 from services.user_service import UserService
 
 class FaceRecognizer:
-    def __init__(self, db: DatabaseService, tolerance=0.6):
+    def __init__(self, db: DatabaseService, tolerance=0.45):
         self.db = db
         self.tolerance = tolerance
         self.load_known_encodings()
@@ -27,20 +27,27 @@ class FaceRecognizer:
             return []
 
         rgb = frame[:, :, ::-1].astype("uint8")
-
         encodings = face_recognition.face_encodings(rgb, known_face_locations=fr_boxes)
 
         results = []
         users = UserService(self.db)
+
         for encoding in encodings:
-            matches = face_recognition.compare_faces(self.known_encodings, encoding, self.tolerance)
             name = "Unknown"
             user_id = None
-            if True in matches:
-                idx = matches.index(True)
-                user_id = self.known_ids[idx]
-                name = users.get_user_name_by_id(user_id) or f"User {user_id}"
+
+            if self.known_encodings:  # nếu có dữ liệu trong DB
+                distances = face_recognition.face_distance(self.known_encodings, encoding)
+                best_match_idx = np.argmin(distances)
+                best_distance = distances[best_match_idx]
+
+                # chỉ nhận diện nếu khoảng cách < tolerance
+                if best_distance <= self.tolerance:
+                    user_id = self.known_ids[best_match_idx]
+                    name = users.get_user_name_by_id(user_id) or f"User {user_id}"
+
             results.append((user_id, name))
+
         return results
 
 
